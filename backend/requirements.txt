@@ -1,0 +1,33 @@
+# En Kural — backend runtime requirements
+# PyTorch with CUDA 12.8 (works with the NVIDIA 595 driver / CUDA 13 runtime as well).
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0
+torchaudio==2.11.0
+
+# numerics / audio
+numpy<2
+scipy
+librosa==0.10.2
+soundfile
+soxr
+pyloudnorm
+noisereduce
+pyworld
+silero-vad
+pydub
+
+# Seed-VC (vendored under vendor/seed-vc) dependencies
+huggingface-hub
+transformers==4.46.3
+munch
+einops
+hydra-core
+omegaconf
+pyyaml
+descript-audio-codec==1.0.0
+
+# web app
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic>=2

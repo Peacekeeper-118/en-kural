@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>En Kural</title>
+  <link rel="preload" href="/static/fonts/Catamaran-Variable.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <a class="skip" href="#work">Skip to converting</a>
+
+  <header class="masthead">
+    <div class="brand">
+      <h1 class="wordmark"><span lang="ta">என் குரல்</span><span class="sr-only"> (En Kural)</span></h1>
+      <p class="tagline">Turn a friend's recording into your own voice. Same words, same timing, same feeling.</p>
+    </div>
+    <div class="masthead-side">
+      <span class="status-dot" id="sysStatus" role="status">Connecting…</span>
+      <a class="quiet-link" href="#privacy">Your data</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- YOUR VOICE: set up once ------------------------------------------------ -->
+    <aside class="voice-panel" aria-labelledby="voiceTitle">
+      <div class="panel-head">
+        <h2 id="voiceTitle">Your voice</h2>
+        <p class="lede">Set this up once. The app learns how you sound from a few minutes of you talking.</p>
+      </div>
+
+      <div class="picker" id="profilePicker">
+        <div class="picker-head">
+          <label class="label" for="profileSelect">Voice</label>
+          <button class="linkish small-link" id="newProfileBtn" type="button">Add another voice</button>
+        </div>
+        <select id="profileSelect"></select>
+      </div>
+
+      <div class="empty" id="voiceEmpty">
+        <p>Create your voice first. You will need:</p>
+        <ul class="needs">
+          <li>1–5 minutes of you talking, in Tamil the way you talk in your videos</li>
+          <li>A quiet room: no music, fan or traffic noise</li>
+          <li>About a minute while the app learns your voice</li>
+        </ul>
+        <button class="btn primary" id="startVoiceBtn" type="button">Create my voice</button>
+      </div>
+
+      <form class="sheet hidden" id="newProfileForm">
+        <h3>Create a voice</h3>
+        <label class="field">
+          <span class="label">Name</span>
+          <input type="text" id="newProfileName" value="My voice" maxlength="80" autocomplete="off">
+        </label>
+        <label class="check">
+          <input type="checkbox" id="consentBox">
+          <span id="consentText">This is my own voice, or I have the owner's permission to use it.</span>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit" id="createProfileBtn" disabled>Create voice</button>
+          <button class="btn quiet" type="button" id="cancelProfileBtn">Cancel</button>
+        </div>
+      </form>
+
+      <div id="profileArea" class="hidden">
+        <div class="voice-state" id="voiceState" aria-live="polite">
+          <span class="state-mark" aria-hidden="true"></span>
+          <div>
+            <p class="state-title" id="voiceStateTitle"></p>
+            <p class="state-text" id="profileStatus"></p>
+          </div>
+        </div>
+        <div class="speech-progress" id="speechProgress">
+          <div class="speech-meter" id="speechMeter" aria-hidden="true"><span></span></div>
+          <div class="ends"><span id="speechNow">0:00 of speech</span><span>1–5 minutes is ideal</span></div>
+        </div>
+
+        <details class="block disclosure" id="recBlock" open>
+          <summary id="recTitle">Recordings of you</summary>
+          <div class="seg tabs" role="tablist" aria-label="Add a recording of you">
+            <button class="tab active" data-tab="upload" type="button" role="tab" aria-selected="true">Upload a file</button>
+            <button class="tab" data-tab="record" type="button" role="tab" aria-selected="false">Record now</button>
+          </div>
+
+          <div class="tabpane" id="tab-upload" role="tabpanel">
+            <div class="drop compact" id="sampleDrop">
+              <input type="file" id="sampleInput" accept="audio/*,video/mp4,.m4a,.wav,.mp3,.ogg,.flac,.webm,.aac" multiple hidden>
+              <p><button class="linkish" type="button" id="samplePick">Choose files</button> or drop them here</p>
+              <p class="hint">Audio or video. Several short files are fine.</p>
+            </div>
+          </div>
+
+          <div class="tabpane hidden" id="tab-record" role="tabpanel">
+            <div class="recorder">
+              <p class="hint">Hold the phone or mic about a hand's length away and talk naturally, the way you do in your videos. Mixing English words in is fine.</p>
+              <div class="rec-row">
+                <button class="btn record" id="recBtn" type="button">Start recording</button>
+                <span class="rec-time" id="recTime">0:00</span>
+                <canvas id="meter" width="160" height="10" aria-label="Microphone level"></canvas>
+              </div>
+              <div id="recPreview" class="hidden">
+                <audio id="recAudio" controls></audio>
+                <div class="row">
+                  <button class="btn primary small" id="recAddBtn" type="button">Use this recording</button>
+                  <button class="btn quiet small" id="recDiscardBtn" type="button">Discard</button>
+                </div>
+              </div>
+              <p class="hint" id="recHint"></p>
+            </div>
+          </div>
+
+          <div class="progress-inline hidden" id="sampleUpload"><div class="bar"><div class="fill"></div></div><span class="label-text">Uploading…</span></div>
+          <ul class="recordings" id="sampleList"></ul>
+
+          <button class="btn primary wide" id="buildBtn" type="button">Learn my voice</button>
+        </details>
+        <div class="progress-panel hidden" id="buildStatus" aria-live="polite"></div>
+        <ul class="notes hidden" id="buildNotes"></ul>
+
+        <details class="block disclosure hidden" id="voiceDetails">
+          <summary>How your voice sounds</summary>
+          <div id="profileAnalysis"></div>
+        </details>
+
+        <details class="block disclosure hidden" id="finetunePanel">
+          <summary>Make it sound even more like you</summary>
+          <p class="hint">Optional. The app trains a copy of the voice model on your recordings, on this computer, in a few minutes. It keeps the result only if it tests better than the standard model on audio it never trained on.</p>
+          <div id="ftConsentBox" class="stack">
+            <label class="check"><input type="checkbox" id="ftConsent"><span id="ftConsentText"></span></label>
+            <div><button class="btn quiet" type="button" id="ftAllowBtn" disabled>Allow training on my recordings</button></div>
+          </div>
+          <div id="ftControls" class="stack hidden">
+            <label class="field">
+              <span class="label">How long to train</span>
+              <select id="ftPreset"></select>
+            </label>
+            <div class="row">
+              <button class="btn primary" type="button" id="ftStartBtn">Start training</button>
+              <button class="btn quiet" type="button" id="ftCancelBtn">Stop training</button>
+            </div>
+            <div class="progress-panel hidden" id="ftStatus" aria-live="polite"></div>
+            <div id="ftResult"></div>
+            <div class="row wrap">
+              <button class="btn quiet small" type="button" id="ftDeleteBtn">Delete the trained model</button>
+              <button class="btn quiet small" type="button" id="ftWithdrawBtn">Stop allowing training</button>
+            </div>
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <!-- CONVERT: the everyday job -------------------------------------------------- -->
+    <main class="work" id="work">
+      <ol class="steps">
+        <li class="step" id="stepSource">
+          <span class="step-marker" aria-hidden="true">1</span>
+          <div class="step-body">
+            <h2>Add the recording</h2>
+            <p class="lede">The audio or video your friend recorded. Their words, pauses and emotion stay exactly as they are; only the voice changes.</p>
+            <div class="drop" id="sourceDrop">
+              <input type="file" id="sourceInput" accept="audio/*,video/*,.m4a,.wav,.mp3,.ogg,.flac,.webm,.aac,.mov,.mkv" hidden>
+              <svg class="drop-icon" id="sourceDropIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <p><button class="linkish" type="button" id="sourcePick">Choose a file</button> or drop it here</p>
+              <p class="hint" id="sourceDropHint">MP3, M4A, WAV, MP4 and most other audio or video files. Tamil, Tanglish and English all work.</p>
+            </div>
+            <div class="progress-inline hidden" id="sourceUpload"><div class="bar"><div class="fill"></div></div><span class="label-text">Uploading…</span></div>
+            <ul class="recordings sources" id="sourceList" aria-label="Your friend's recordings"></ul>
+          </div>
+        </li>
+
+        <li class="step" id="stepOptions">
+          <span class="step-marker" aria-hidden="true">2</span>
+          <div class="step-body">
+            <h2>Choose how it sounds</h2>
+            <p class="lede">The defaults sound natural for most recordings. You can convert straight away.</p>
+
+            <div class="choice">
+              <div class="choice-head">
+                <label class="label" for="similarity">How much like you</label>
+                <output id="similarityOut" for="similarity">65</output>
+              </div>
+              <input type="range" id="similarity" min="0" max="100" step="1" value="65" aria-describedby="simEnds">
+              <div class="ends" id="simEnds"><span>Clearer words</span><span>More like me</span></div>
+            </div>
+
+            <fieldset class="choice">
+              <legend class="label">Quality</legend>
+              <div class="seg" id="qualityGroup">
+                <label><input type="radio" name="quality" value="draft"><span>Quick preview</span></label>
+                <label><input type="radio" name="quality" value="standard" checked><span>Standard</span></label>
+                <label><input type="radio" name="quality" value="high"><span>Best</span></label>
+              </div>
+              <p class="hint" id="qualityHint"></p>
+            </fieldset>
+
+            <fieldset class="choice" id="backgroundChoice">
+              <legend class="label">Background music</legend>
+              <div class="seg" id="backgroundGroup">
+                <label><input type="radio" name="background" value="keep" checked><span>Keep the music</span></label>
+                <label><input type="radio" name="background" value="remove"><span>Remove it</span></label>
+                <label><input type="radio" name="background" value="off"><span>Don't separate</span></label>
+              </div>
+              <p class="hint" id="backgroundHint"></p>
+            </fieldset>
+
+            <details class="disclosure more">
+              <summary>More options</summary>
+              <div class="more-grid">
+                <div class="choice">
+                  <div class="choice-head"><label class="label" for="pitch">Pitch</label><output id="pitchOut" for="pitch">0</output></div>
+                  <input type="range" id="pitch" min="-4" max="4" step="0.5" value="0">
+                  <p class="hint">0 keeps your natural pitch. Small changes only.</p>
+                </div>
+                <div class="choice">
+                  <div class="choice-head"><label class="label" for="speed">Speaking speed</label><output id="speedOut" for="speed">1.00×</output></div>
+                  <input type="range" id="speed" min="0.85" max="1.15" step="0.01" value="1">
+                  <p class="hint">1.00× keeps the original timing.</p>
+                </div>
+                <div class="choice">
+                  <div class="choice-head"><label class="label" for="energy">Emphasis</label><output id="energyOut" for="energy">1.00×</output></div>
+                  <input type="range" id="energy" min="0.7" max="1.3" step="0.05" value="1">
+                  <p class="hint">How strongly loud and soft moments stand out. 1.00× matches the original.</p>
+                </div>
+                <label class="field">
+                  <span class="label">Clean up background noise</span>
+                  <select id="denoise">
+                    <option value="auto" selected>Only when needed</option>
+                    <option value="on">Always</option>
+                    <option value="off">Never</option>
+                  </select>
+                </label>
+                <label class="check" id="useFinetunedRow"><input type="checkbox" id="useFinetuned" checked><span>Use my trained voice model</span></label>
+                <label class="check"><input type="checkbox" id="preserveDynamics" checked><span>Keep the original's loud and soft moments</span></label>
+                <label class="field">
+                  <span class="label">Conversion engine</span>
+                  <select id="engineSelect"></select>
+                  <span class="hint" id="engineDesc"></span>
+                </label>
+                <div><button class="btn quiet small" type="button" id="resetBtn">Back to the defaults</button></div>
+              </div>
+            </details>
+
+            <div class="convert-bar">
+              <button class="btn convert" id="convertBtn" type="button" disabled>Convert to my voice</button>
+              <p class="hint" id="convertHint"></p>
+            </div>
+            <div class="progress-panel hidden" id="convertStatus" aria-live="polite"></div>
+          </div>
+        </li>
+
+        <li class="step" id="sec-preview">
+          <span class="step-marker" aria-hidden="true">3</span>
+          <div class="step-body">
+            <h2>Listen and download</h2>
+            <p class="lede" id="resultLede">Your converted recording appears here, next to the original, so you can compare them.</p>
+            <div class="compare">
+              <div class="track friend" id="playerSource">
+                <p class="track-name">Your friend's recording</p>
+                <p class="track-empty">Add a recording in step 1 to see it here.</p>
+                <canvas class="wave" height="72" aria-hidden="true"></canvas>
+                <audio controls preload="none"></audio>
+              </div>
+              <div class="track you" id="playerOut">
+                <p class="track-name">In your voice</p>
+                <p class="track-empty">Convert in step 2 to hear it here.</p>
+                <canvas class="wave" height="104" aria-hidden="true"></canvas>
+                <audio controls preload="none"></audio>
+              </div>
+            </div>
+            <ul class="facts" id="resultMeta"></ul>
+
+            <div class="download-area hidden" id="downloadArea">
+            <div class="download" id="downloadBox">
+              <label class="field grow">
+                <span class="label">File name</span>
+                <input type="text" id="exportName" value="my-voice" maxlength="60" autocomplete="off">
+              </label>
+              <button class="btn primary" id="exportMp3" type="button" disabled>Download MP3</button>
+              <button class="btn quiet" id="exportWav" type="button" disabled>Download WAV</button>
+            </div>
+            <p class="hint">MP3 is ready for Instagram Reels and YouTube Shorts. WAV is the best quality for editing. Both are 44.1 kHz with loudness matched to social media.</p>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </main>
+  </div>
+
+  <!-- YOUR DATA --------------------------------------------------------------- -->
+  <footer class="privacy" id="privacy">
+    <div class="privacy-inner">
+      <div>
+        <h2>Your data stays on this computer</h2>
+        <p>Nothing is uploaded anywhere. Your recordings are private files on this machine and are only used for training if you allow it for a voice.</p>
+        <p class="hint" id="storageInfo"></p>
+      </div>
+      <div class="danger-zone">
+        <button class="btn quiet small" id="delResultBtn" type="button" disabled>Delete this result</button>
+        <button class="btn quiet small" id="delSourceBtn" type="button">Delete the selected recording</button>
+        <button class="btn quiet small" id="delProfileBtn" type="button">Delete this voice</button>
+        <button class="btn danger small" id="delAllBtn" type="button">Delete everything</button>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

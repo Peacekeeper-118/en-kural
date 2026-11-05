@@ -1,0 +1,13 @@
+.venv/
+data/
+data_smoke/
+models/
+bin/ffmpeg
+bin/ffprobe
+vendor/seed-vc/checkpoints/
+tests/out/
+tests/_data/
+__pycache__/
+*.pyc
+.pytest_cache/
+eval_runs/

@@ -1,0 +1,5 @@
+# tools used only for testing / evaluation (not needed to run the app)
+edge-tts>=7.2
+jiwer
+pytest
+httpx
