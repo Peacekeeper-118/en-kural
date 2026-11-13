@@ -13,6 +13,20 @@ voice.  Nothing leaves your computer.
 My voice recordings → Voice profile → Friend's recording → Convert → Preview → Export (WAV / MP3)
 ```
 
+## Quick start
+
+> **Platform:** Linux (tested on Ubuntu) · **GPU:** NVIDIA with ≥ 6 GB VRAM recommended (CPU works, slowly) · Windows and macOS are not supported or tested.
+
+```bash
+git clone https://github.com/Peacekeeper-118/en-kural.git
+cd en-kural
+./scripts/setup.sh    # once: ~4 GB download, no sudo
+./start.sh            # opens the app in your browser
+```
+
+Then create your voice profile, add a recording and click convert.  Details
+below.
+
 ## How it works
 
 This is **not** a pitch shifter.  The default engine is
@@ -68,8 +82,6 @@ example and can be selected under *Advanced*.
 ## Setup
 
 ```bash
-git clone https://github.com/Peacekeeper-118/en-kural.git
-cd en-kural
 ./scripts/setup.sh        # once: installs uv + Python 3.11 venv, deps, static ffmpeg, Seed-VC, models
 ./start.sh                # every time: starts the app and opens it in your browser
 ```
@@ -125,7 +137,8 @@ training, see below) are underneath.
 Everything is also usable by keyboard, works on a phone-sized screen, follows
 the system's light / dark setting and respects reduced motion.
 
-## Measured on this machine (RTX 4050 laptop, 6 GB)
+<details>
+<summary><b>Performance notes</b> — benchmark on an RTX 4050 laptop (6 GB) and what was optimised</summary>
 
 `scripts/benchmark.py`, seed 0, voice isolated from a real Reel as the target,
 a 21 s and a 50 s Tamil source (averages; per-conversion wall time including
@@ -146,7 +159,7 @@ duration (÷ speed).  The first conversion after start-up adds ~10–20 s for
 loading the models (plus ~5 s once per machine to compile the vocoder kernels);
 the pitch model loads separately the first time it is used.
 
-## Speed
+### Speed
 
 Where the time went (standard, 21 s clip, before): DiT 60 %, vocoder 27 %,
 Whisper < 1 %.  What changed — all verified by `tests/test_fast_ops.py` and the
@@ -169,6 +182,8 @@ benchmark above:
 Tried and rejected: fp16 vocoder (18 % waveform error), skipping guidance in the
 first steps (drift 2.5–3 dB, worse CER), whole-model vocoder compile (slower and
 45 s compile).  Seed-VC v2 is unchanged.
+
+</details>
 
 ## Fine-tuning (optional, opt-in)
 
@@ -333,6 +348,24 @@ En Kural is released under the **GNU General Public License v3.0** — see
 [Seed-VC](https://github.com/Plachtaa/seed-vc), which is itself GPL-3.0, so the
 combined work is distributed under the same terms.  Model weights and other
 third-party components keep their own licences (see below).
+
+## Third-party components and licences
+
+En Kural downloads these at setup time; they are **not** part of this repository
+and keep their own licences.  The table lists what I could confirm; for the
+rest, check the upstream repository or model card before redistributing weights
+or using the output commercially.
+
+| Component | Used for | Licence |
+|---|---|---|
+| [Seed-VC](https://github.com/Plachtaa/seed-vc) (Plachta) | default voice-conversion engine | GPL-3.0 |
+| [Whisper](https://github.com/openai/whisper) (OpenAI) | content encoder | MIT |
+| [BigVGAN](https://github.com/NVIDIA/BigVGAN) (NVIDIA) | vocoder | MIT |
+| [Silero VAD](https://github.com/snakers4/silero-vad) | speech detection | MIT |
+| [Demucs](https://github.com/facebookresearch/demucs) (Meta, via torchaudio) | voice / background separation | MIT |
+| [OpenVoice V2](https://github.com/myshell-ai/OpenVoice) (MyShell) | fine-tuning | MIT |
+| [Catamaran](https://github.com/impallari/Catamaran) typeface | UI font (Tamil + Latin) | SIL OFL 1.1 (`frontend/fonts/OFL.txt`) |
+| CAMPPlus (FunASR), RMVPE, WORLD (pyworld), WavLM-SV (Microsoft), UTMOS22 (SpeechMOS), whisper-tamil-small (vasista22) | speaker embedding, pitch, evaluation judges | see each upstream project |
 
 ## Credits
 
