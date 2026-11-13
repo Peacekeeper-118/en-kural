@@ -1,5 +1,9 @@
 # En Kural (என் குரல்) — convert any recording into *your* voice
 
+![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)
+![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)
+![Runs locally](https://img.shields.io/badge/runs-100%25%20locally-green.svg)
+
 A local, privacy-first voice-conversion app built for Tamil content.
 Record or upload clean samples of your own voice, upload a recording made by a
 friend, and get the same words, timing, pauses and emotion back — spoken in your
@@ -64,6 +68,8 @@ example and can be selected under *Advanced*.
 ## Setup
 
 ```bash
+git clone https://github.com/Peacekeeper-118/en-kural.git
+cd en-kural
 ./scripts/setup.sh        # once: installs uv + Python 3.11 venv, deps, static ffmpeg, Seed-VC, models
 ./start.sh                # every time: starts the app and opens it in your browser
 ```
@@ -306,6 +312,27 @@ scripts/   setup.sh download_models.py make_test_audio.py evaluate.py benchmark.
 vendor/seed-vc                            upstream model code (unmodified)
 bin/ffmpeg, bin/ffprobe                   static ffmpeg build
 ```
+
+## Responsible use
+
+En Kural is meant for converting recordings into **your own voice**, or a voice
+you have clear permission to use.  The app asks for a consent confirmation
+before a profile can be created.  Do not use it to impersonate, deceive or
+harass anyone, and follow the laws that apply to you.
+
+## Contributing
+
+Issues and pull requests are welcome.  Please run the tests
+(`PYTHONPATH=backend .venv/bin/python -m pytest tests -q`) before opening a PR,
+and never commit voice recordings, `data/`, `models/` or `.env` files.
+
+## License
+
+En Kural is released under the **GNU General Public License v3.0** — see
+[`LICENSE`](LICENSE).  The default engine uses
+[Seed-VC](https://github.com/Plachtaa/seed-vc), which is itself GPL-3.0, so the
+combined work is distributed under the same terms.  Model weights and other
+third-party components keep their own licences (see below).
 
 ## Credits
 

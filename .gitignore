@@ -11,3 +11,14 @@ __pycache__/
 *.pyc
 .pytest_cache/
 eval_runs/
+.env
+.env.*
+*.log
+.venv*/
+.idea/
+.vscode/
+.DS_Store
+*.wav
+*.mp3
+*.m4a
+!tests/data/*.wav
